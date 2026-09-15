@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class BackendConfig {
   BackendConfig._();
 
@@ -11,6 +13,11 @@ class BackendConfig {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!;
     }
+    try {
+      if (Platform.isAndroid) {
+        return androidEmulatorUrl;
+      }
+    } catch (_) {}
     return localAdbUrl;
   }
 
@@ -22,4 +29,5 @@ class BackendConfig {
   static String get enhanceImageUrl => '$baseUrl/enhance-image';
   static String get analyzeImageUrl => '$baseUrl/analyze-image';
   static String get healthUrl => '$baseUrl/health';
+  static String get askAiUrl => '$baseUrl/ask-ai';
 }

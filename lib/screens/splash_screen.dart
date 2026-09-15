@@ -5,6 +5,9 @@ import '../constants.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/order_repository.dart';
 import '../repositories/product_repository.dart';
+import '../repositories/wishlist_repository.dart';
+import '../repositories/recent_repository.dart';
+import '../repositories/review_repository.dart';
 import '../services/tts_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -41,6 +44,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ProductRepository.instance.init(),
       CartRepository.instance.init(),
       OrderRepository.instance.init(),
+      ReviewRepository.instance.init(),
+      WishlistRepository.instance.init(),
+      RecentRepository.instance.init(),
       TtsService.instance.init(),
       Future<void>.delayed(const Duration(milliseconds: 1400)),
     ]);

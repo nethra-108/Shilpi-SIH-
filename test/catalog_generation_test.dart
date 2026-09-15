@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:craftlink_ai/services/catalog_service.dart';
-import 'package:craftlink_ai/services/pricing_service.dart';
+
 
 void main() {
   group('AI Catalog Generation Tests', () {
@@ -32,29 +32,7 @@ void main() {
       expect(catalog.detailedDescription.contains('Laptop, Computer, Screen, Technology'), isTrue);
     });
 
-    test('Pricing for Other category does not default to Bamboo Basket pricing', () {
-      // When artisan expected price is not provided
-      final unpriced = PricingService.instance.estimatePricing(
-        category: 'Other',
-        material: 'Engineered metal',
-      );
 
-      // Must not use bamboo basket prices (750 - 1150 / 899)
-      expect(unpriced.suggestedPrice, equals(0));
-      expect(unpriced.marketLow, equals(0));
-      expect(unpriced.marketHigh, equals(0));
-
-      // When artisan expected price is provided
-      final priced = PricingService.instance.estimatePricing(
-        category: 'Other',
-        material: 'Engineered metal',
-        artisanExpected: 35000,
-      );
-
-      expect(priced.recommendedPrice, equals(35000));
-      expect(priced.marketLow, equals((35000 * 0.85).round()));
-      expect(priced.marketHigh, equals((35000 * 1.25).round()));
-    });
 
     test('Textiles category generates textile data without Bamboo Basket references', () {
       final catalog = CatalogService.instance.generateCatalog(

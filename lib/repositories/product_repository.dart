@@ -73,6 +73,21 @@ class ProductRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateProduct(Product product) async {
+    final index = _products.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      _products[index] = product;
+      await _saveToDisk();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    _products.removeWhere((p) => p.id == id);
+    await _saveToDisk();
+    notifyListeners();
+  }
+
   List<Product> search(String query) {
     if (query.trim().isEmpty) return products;
     final q = query.trim().toLowerCase();

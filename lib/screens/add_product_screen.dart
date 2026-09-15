@@ -9,7 +9,7 @@ import '../repositories/product_repository.dart';
 import '../services/catalog_service.dart';
 import '../services/image_analysis_service.dart';
 import '../services/image_enhancement_service.dart';
-import '../services/pricing_service.dart';
+
 import '../services/tts_service.dart';
 import 'image_comparison_dialog.dart';
 import 'voice_capture_dialog.dart';
@@ -50,13 +50,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   bool isAnalyzingImage = false;
   bool isEnhancingImage = false;
-  bool isPricingAnalyzed = false;
-
-  int marketPrice = 0;
-  int marketLow = 0;
-  int marketHigh = 0;
-  int recommendedPrice = 0;
-  String? priceWarning;
+  int marketPrice = 800;
+  int marketLow = 700;
+  int marketHigh = 900;
 
   @override
   void dispose() {
@@ -217,7 +213,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       });
 
       regenerateCatalog(detectedTitle: analysis.productName);
-      calculatePricing();
+      
 
       // Show Before / After Comparison Dialog
       final ImageComparisonResult? compResult =
@@ -337,7 +333,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     });
 
     regenerateCatalog();
-    calculatePricing();
+    
   }
 
   void regenerateCatalog({String? detectedTitle}) {
@@ -384,26 +380,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     });
   }
 
-  void calculatePricing() {
-    final int? expected = int.tryParse(expectedPriceController.text.trim());
-    final int? days = int.tryParse(makingTimeController.text.replaceAll(RegExp(r'[^0-9]'), ''));
 
-    final recommendation = PricingService.instance.estimatePricing(
-      category: category,
-      material: materialController.text.trim(),
-      artisanExpected: expected,
-      makingDays: days,
-    );
-
-    setState(() {
-      marketLow = recommendation.marketLow;
-      marketHigh = recommendation.marketHigh;
-      marketPrice = recommendation.suggestedPrice;
-      recommendedPrice = recommendation.recommendedPrice;
-      priceWarning = recommendation.warningMessage;
-      isPricingAnalyzed = true;
-    });
-  }
 
   Future<void> confirmAndPublish() async {
     if (displayPhotoPath == null) {
@@ -413,9 +390,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
-    final int finalPrice = recommendedPrice > 0
-        ? recommendedPrice
-        : (int.tryParse(expectedPriceController.text.trim()) ?? marketPrice);
+    final int finalPrice = int.tryParse(expectedPriceController.text.trim()) ?? marketPrice;
 
     final String finalName = nameController.text.trim().isEmpty
         ? 'Handmade $category Craft'
@@ -792,7 +767,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 setState(() {
                   category = val;
                   regenerateCatalog();
-                  calculatePricing();
+                  
                 });
               }
             },
@@ -863,109 +838,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
           ),
           const SizedBox(height: 14),
 
-          const SectionTitle('5. AI Smart Pricing Assistance'),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Market Estimate Range',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Prototype Benchmark',
-                      style: TextStyle(fontSize: 10, color: Colors.grey, fontStyle: FontStyle.italic),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  marketLow > 0 && marketHigh > 0
-                      ? '₹$marketLow – ₹$marketHigh'
-                      : 'Add photo or expected price to estimate',
-                  style: TextStyle(
-                    fontSize: marketLow > 0 ? 19 : 13,
-                    fontWeight: marketLow > 0 ? FontWeight.w900 : FontWeight.normal,
-                    color: marketLow > 0 ? kDarkGreen : Colors.grey[600],
-                  ),
-                ),
-                const Divider(height: 18),
-                TextField(
-                  controller: expectedPriceController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => calculatePricing(),
-                  decoration: InputDecoration(
-                    labelText: 'Artisan Expected Price (₹)',
-                    hintText: 'e.g. 1200',
-                    prefixIcon: const Icon(Icons.currency_rupee),
-                    filled: true,
-                    fillColor: const Color(0xFFF7F4EC),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (isPricingAnalyzed) ...<Widget>[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5F2EA),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        const Text(
-                          'Recommended Selling Price',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                        Text(
-                          '₹$recommendedPrice',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: kGreen,
-                          ),
-                        ),
-                        const Text(
-                          'Guarantees fair artisan compensation and competitive market viability',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (priceWarning != null) ...<Widget>[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF1DF),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          const Icon(Icons.shield_outlined, color: Colors.orange, size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              priceWarning!,
-                              style: const TextStyle(fontSize: 11, color: Colors.brown),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ],
+          const SectionTitle('5. Pricing'),
+          TextField(
+            controller: expectedPriceController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Expected Selling Price (₹)',
+              hintText: 'e.g. 1200',
+              prefixIcon: const Icon(Icons.currency_rupee),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),
           const SizedBox(height: 16),

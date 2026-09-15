@@ -1,12 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-
-import '../constants.dart';
 import '../models/product.dart';
 import '../repositories/cart_repository.dart';
-import 'checkout_screen.dart';
+import '../repositories/wishlist_repository.dart';
+import '../repositories/recent_repository.dart';
+import '../repositories/review_repository.dart';
+import '../services/shilpi_ai_service.dart';
+import '../theme/colors.dart';
+import 'artisan_profile_screen.dart';
+import 'craft_passport_sheet.dart';
+import 'assistant_screen.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final VoidCallback? onAdd;
 
@@ -17,246 +22,364 @@ class ProductDetailsScreen extends StatelessWidget {
   });
 
   @override
+  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  String? _aiSummary;
+  bool _isLoadingSummary = false;
+
+  @override
+  void initState() {
+    super.initState();
+    RecentRepository.instance.addView(widget.product.id);
+    _fetchAiSummary();
+  }
+
+  Future<void> _fetchAiSummary() async {
+    final reviews = ReviewRepository.instance.getReviewsForProduct(widget.product.id);
+    if (reviews.isEmpty) return;
+
+    setState(() => _isLoadingSummary = true);
+    final prompt = "Summarize these reviews in one short, positive sentence: " +
+        reviews.map((e) => "${e.rating} stars: ${e.comment}").join(" | ");
+
+    try {
+      final res = await ShilpiAiService.instance.ask(prompt, AiContextMode.buyer);
+      if (mounted) setState(() => _aiSummary = res.text);
+    } catch (_) {}
+    if (mounted) setState(() => _isLoadingSummary = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Product Details', style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Craft link copied to clipboard')),
-              );
-            },
-            icon: const Icon(Icons.share_outlined),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.white.withOpacity(0.9),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: ShilpiColors.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Saved to your Favorites')),
-              );
-            },
-            icon: const Icon(Icons.favorite_border),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.white.withOpacity(0.9),
+              child: ListenableBuilder(
+                listenable: WishlistRepository.instance,
+                builder: (context, _) {
+                  final isSaved = WishlistRepository.instance.isSaved(widget.product.id);
+                  return IconButton(
+                    icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border, color: isSaved ? Colors.red : ShilpiColors.textPrimary),
+                    onPressed: () => WishlistRepository.instance.toggleSave(widget.product.id),
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 7, 14, 12),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: ShilpiColors.surface,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+          ],
+        ),
+        child: SafeArea(
           child: Row(
-            children: <Widget>[
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Total Price', style: TextStyle(color: ShilpiColors.textSecondary, fontSize: 12)),
+                  Text('₹${widget.product.price}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: ShilpiColors.primaryDark)),
+                ],
+              ),
+              const SizedBox(width: 24),
               Expanded(
-                child: OutlinedButton.icon(
+                child: FilledButton.icon(
                   onPressed: () {
-                    CartRepository.instance.addItem(product);
-                    if (onAdd != null) onAdd!();
+                    CartRepository.instance.addItem(widget.product);
+                    widget.onAdd?.call();
+                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        backgroundColor: kGreen,
-                        content: Text('Added "${product.name}" to cart'),
+                        content: Text('Added ${widget.product.name} to cart'),
+                        backgroundColor: ShilpiColors.success,
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
-                  icon: const Icon(Icons.shopping_cart_outlined),
+                  icon: const Icon(Icons.shopping_bag_outlined),
                   label: const Text('Add to Cart'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () {
-                    CartRepository.instance.addItem(product);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            CheckoutScreen(total: product.price),
-                      ),
-                    );
-                  },
-                  child: const Text('Buy Now'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(18),
-        children: <Widget>[
-          Container(
-            height: 300,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE6E3D8),
-              borderRadius: BorderRadius.circular(22),
-              gradient: product.imagePath == null
-                  ? const LinearGradient(
-                      colors: <Color>[Color(0xFFE6E3D8), Color(0xFFD9E7DD)],
-                    )
-                  : null,
-            ),
-            child: (product.imagePath != null && File(product.imagePath!).existsSync())
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(22),
-                    child: Image.file(
-                      File(product.imagePath!),
-                      fit: BoxFit.contain,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Gallery
+            SizedBox(
+              height: 400,
+              width: double.infinity,
+              child: (widget.product.imagePath != null && File(widget.product.imagePath!).existsSync())
+                  ? Image.file(File(widget.product.imagePath!), fit: BoxFit.cover)
+                  : Container(
+                      color: ShilpiColors.surfaceMuted,
+                      child: Center(child: Text(widget.product.emoji, style: const TextStyle(fontSize: 100))),
                     ),
-                  )
-                : Center(
-                    child: Text(
-                      product.emoji,
-                      style: const TextStyle(fontSize: 110),
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Tags
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Chip(label: Text(widget.product.category)),
+                      Chip(label: Text(widget.product.material)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Title & Rating
+                  Text(widget.product.name, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: ShilpiColors.primaryDark, height: 1.2)),
+                  const SizedBox(height: 12),
+                  
+                  ListenableBuilder(
+                    listenable: ReviewRepository.instance,
+                    builder: (context, _) {
+                      final reviews = ReviewRepository.instance.getReviewsForProduct(widget.product.id);
+                      if (reviews.isEmpty) return const SizedBox.shrink();
+                      final avg = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+                      return Row(
+                        children: [
+                          const Icon(Icons.star, color: ShilpiColors.warning, size: 20),
+                          const SizedBox(width: 4),
+                          Text(avg.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          const SizedBox(width: 8),
+                          Text('(${reviews.length} reviews)', style: const TextStyle(color: ShilpiColors.textSecondary)),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // AI Chat Action
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => AssistantScreen(productContext: widget.product)));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ShilpiColors.primaryLight,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: ShilpiColors.primary.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                            child: const Icon(Icons.auto_awesome, color: ShilpiColors.primary),
+                          ),
+                          const SizedBox(width: 16),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Ask Shilpi AI', style: TextStyle(fontWeight: FontWeight.bold, color: ShilpiColors.primaryDark)),
+                                Text('Have questions about this craft?', style: TextStyle(fontSize: 13, color: ShilpiColors.textSecondary)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: ShilpiColors.primary),
+                        ],
+                      ),
                     ),
                   ),
-          ),
-          const SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
-          Text(
-            product.name,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w900,
-              color: kDarkGreen,
-            ),
-          ),
-          const SizedBox(height: 6),
+                  // Description
+                  const Text('Description', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark)),
+                  const SizedBox(height: 12),
+                  Text(widget.product.story, style: const TextStyle(fontSize: 16, height: 1.6, color: ShilpiColors.textSecondary)),
+                  const SizedBox(height: 32),
 
-          Row(
-            children: <Widget>[
-              Text(
-                '⭐ ${product.rating}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              const SizedBox(width: 8),
-              const Text('•', style: TextStyle(color: Colors.grey)),
-              const SizedBox(width: 8),
-              const Icon(Icons.verified, size: 16, color: kGreen),
-              const SizedBox(width: 4),
-              Text(
-                product.artisan,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: kDarkGreen,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[
-              Text(
-                '₹${product.price}',
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: kDarkGreen,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE5EFE9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Fair Price Verified',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: kGreen,
+                  // Provenance & Maker
+                  const Text('Authenticity', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark)),
+                  const SizedBox(height: 16),
+                  
+                  // Craft Passport
+                  GestureDetector(
+                    onTap: () => showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => CraftPassportSheet(product: widget.product),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ShilpiColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: ShilpiColors.border),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8)],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.qr_code_scanner, size: 32, color: ShilpiColors.primary),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Craft Passport', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: ShilpiColors.primaryDark)),
+                                const SizedBox(height: 4),
+                                Text('Verified Shilpi provenance record', style: TextStyle(fontSize: 13, color: ShilpiColors.textSecondary)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: ShilpiColors.textMuted),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: const <Widget>[
-              Chip(label: Text('🌱 Eco Friendly')),
-              Chip(label: Text('✓ 100% Authentic')),
-              Chip(label: Text('🤝 Direct Artisan Benefit')),
-            ],
-          ),
-          const SizedBox(height: 18),
-
-          if (product.length != null || product.width != null || product.height != null) ...<Widget>[
-            const Text(
-              'Dimensions',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: <Widget>[
-                  const Icon(Icons.straighten, color: kGreen, size: 20),
-                  const SizedBox(width: 10),
-                  Text(
-                    '${product.length ?? "-"} cm (L)  ×  ${product.width ?? "-"} cm (W)  ×  ${product.height ?? "-"} cm (H)',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  const SizedBox(height: 16),
+                  
+                  // Meet the Maker
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ArtisanProfileScreen(artisanName: widget.product.artisan)));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: ShilpiColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: ShilpiColors.border),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8)],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: ShilpiColors.primaryLight,
+                            child: Text(widget.product.artisan[0], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: ShilpiColors.primary)),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Meet the Maker', style: TextStyle(fontSize: 12, color: ShilpiColors.textSecondary, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                const SizedBox(height: 4),
+                                Text(widget.product.artisan, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: ShilpiColors.primaryDark)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: ShilpiColors.textMuted),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  const Text('Customer Reviews', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark)),
+                  const SizedBox(height: 16),
+                  
+                  if (_isLoadingSummary)
+                    const Padding(padding: EdgeInsets.all(16.0), child: Center(child: CircularProgressIndicator()))
+                  else if (_aiSummary != null)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: ShilpiColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: ShilpiColors.primaryLight, width: 2),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.auto_awesome, color: ShilpiColors.primary, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('AI Review Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: ShilpiColors.primary)),
+                                const SizedBox(height: 4),
+                                Text(_aiSummary!, style: const TextStyle(fontSize: 14, color: ShilpiColors.textPrimary, height: 1.4)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  
+                  ListenableBuilder(
+                    listenable: ReviewRepository.instance,
+                    builder: (context, _) {
+                      final reviews = ReviewRepository.instance.getReviewsForProduct(widget.product.id);
+                      if (reviews.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text('No reviews yet. Be the first to review after purchase!', style: TextStyle(color: ShilpiColors.textSecondary)),
+                        );
+                      }
+                      return Column(
+                        children: reviews.map((r) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(radius: 16, backgroundColor: ShilpiColors.surfaceMuted, child: Text(r.reviewerName[0], style: const TextStyle(color: ShilpiColors.textSecondary, fontSize: 12))),
+                                  const SizedBox(width: 12),
+                                  Text(r.reviewerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  const Spacer(),
+                                  Row(children: List.generate(5, (index) => Icon(Icons.star, size: 14, color: index < r.rating.round() ? ShilpiColors.warning : ShilpiColors.surfaceMuted))),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(r.comment, style: const TextStyle(color: ShilpiColors.textSecondary, height: 1.4)),
+                              const Divider(height: 24),
+                            ],
+                          ),
+                        )).toList(),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
           ],
-
-          const Text(
-            'About this Craft',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Handcrafted ${product.category.toLowerCase()} crafted from ${product.material}. '
-            'Craft technique: ${product.craftType}. Created directly by ${product.artisan} in ${product.location}.',
-            style: const TextStyle(height: 1.4, fontSize: 14),
-          ),
-          const SizedBox(height: 20),
-
-          const Text(
-            'The Story Behind This Craft',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              product.story,
-              style: const TextStyle(height: 1.45, fontSize: 14, color: Colors.black87),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          Row(
-            children: <Widget>[
-              const Icon(Icons.location_on, color: kGreen, size: 18),
-              const SizedBox(width: 6),
-              Text(
-                product.location,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-        ],
+        ),
       ),
     );
   }

@@ -92,7 +92,7 @@ class OrderRepository extends ChangeNotifier {
 
   List<ShilpiOrder> getOrdersForSeller(List<String> sellerProductNames) {
     if (sellerProductNames.isEmpty) {
-      return orders;
+      return <ShilpiOrder>[];
     }
     final normalized = sellerProductNames.map((e) => e.toLowerCase()).toSet();
     return _orders.where((order) {
@@ -102,7 +102,7 @@ class OrderRepository extends ChangeNotifier {
 
   int getSellerRevenue(List<String> sellerProductNames) {
     if (sellerProductNames.isEmpty) {
-      return _orders.fold<int>(0, (sum, o) => sum + o.total);
+      return 0;
     }
     final normalized = sellerProductNames.map((e) => e.toLowerCase()).toSet();
     int sum = 0;
@@ -116,20 +116,29 @@ class OrderRepository extends ChangeNotifier {
     return sum;
   }
 
+  
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
+    final idx = _orders.indexWhere((o) => o.orderId == orderId);
+    if (idx != -1) {
+      final old = _orders[idx];
+      _orders[idx] = ShilpiOrder(
+        orderId: old.orderId,
+        items: old.items,
+        total: old.total,
+        deliveryFee: old.deliveryFee,
+        status: newStatus,
+        customerName: old.customerName,
+        deliveryAddress: old.deliveryAddress,
+        paymentMethod: old.paymentMethod,
+        createdAt: old.createdAt,
+      );
+      await _saveToDisk();
+      notifyListeners();
+    }
+  }
+
   void _seedInitialOrders() {
     _orders.clear();
-    _orders.add(
-      ShilpiOrder(
-        orderId: '#SH1023',
-        items: <CartItem>[],
-        total: 1250,
-        deliveryFee: 60,
-        status: 'Delivered',
-        customerName: 'Sanjay Verma',
-        deliveryAddress: 'Banjara Hills, Hyderabad',
-        paymentMethod: 'UPI (PhonePe)',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-    );
+
   }
 }
