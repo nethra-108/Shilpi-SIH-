@@ -78,11 +78,16 @@ class ShilpiAiService {
 
     // 3. Call AI Backend
     try {
+      final uri = Uri.parse(BackendConfig.askAiUrl);
+      print('DEBUG: Sending AI request to: $uri');
       final response = await http.post(
-        Uri.parse(BackendConfig.askAiUrl),
+        uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 60));
+
+      print('DEBUG: AI Response Status: ${response.statusCode}');
+      print('DEBUG: AI Response Body (first 100 chars): ${response.body.length > 100 ? response.body.substring(0, 100) : response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 400 || response.statusCode == 500) {
         try {
