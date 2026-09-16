@@ -195,8 +195,8 @@ class _MainPageState extends State<MainPage> {
         },
       ),
       ExplorePage(onOpen: openProduct),
-      const OrdersPage(), // Reusing Orders as Wishlist/Heart tab placeholder
-      const CartPage(),
+      WishlistPage(onOpen: openProduct), // Real Wishlist at index 2
+      const CartPage(), // Real Cart at index 3
       SellerPage(
         onAdd: addSellerProduct,
       ),

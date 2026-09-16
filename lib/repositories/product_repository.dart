@@ -139,6 +139,7 @@ class ProductRepository extends ChangeNotifier {
     _products.addAll(<Product>[
       Product(
         id: 'p_terracotta_pot',
+        imagePath: 'https://images.unsplash.com/photo-1611269154421-4e27233ac5c7?auto=format&fit=crop&w=800&q=80',
         name: 'Handmade Terracotta Pot',
         category: 'Pottery',
         artisan: 'Meenakshi Devi',
@@ -157,6 +158,7 @@ class ProductRepository extends ChangeNotifier {
       ),
       Product(
         id: 'p_cotton_saree',
+        imagePath: 'https://images.unsplash.com/photo-1605647540924-852290f6b0d5?auto=format&fit=crop&w=800&q=80',
         name: 'Handwoven Cotton Saree',
         category: 'Textiles',
         artisan: 'Lakshmi Weaver Collective',
@@ -175,6 +177,7 @@ class ProductRepository extends ChangeNotifier {
       ),
       Product(
         id: 'p_bamboo_basket',
+        imagePath: 'https://images.unsplash.com/photo-1603732890520-2a818c38dc9c?auto=format&fit=crop&w=800&q=80',
         name: 'Bamboo Storage Basket',
         category: 'Bamboo',
         artisan: 'Ramesh Bamboo Crafts',
@@ -193,6 +196,7 @@ class ProductRepository extends ChangeNotifier {
       ),
       Product(
         id: 'p_wood_bowl',
+        imagePath: 'https://images.unsplash.com/photo-1603732890520-2a818c38dc9c?auto=format&fit=crop&w=800&q=80',
         name: 'Handcrafted Wooden Bowl',
         category: 'Woodwork',
         artisan: 'Srinivas Wood Art',
@@ -211,6 +215,7 @@ class ProductRepository extends ChangeNotifier {
       ),
       Product(
         id: 'p_silver_earrings',
+        imagePath: 'https://images.unsplash.com/photo-1603732890520-2a818c38dc9c?auto=format&fit=crop&w=800&q=80',
         name: 'Tribal Silver Earrings',
         category: 'Jewellery',
         artisan: 'Asha Tribal Crafts',
@@ -229,6 +234,7 @@ class ProductRepository extends ChangeNotifier {
       ),
       Product(
         id: 'p_palm_decor',
+        imagePath: 'https://images.unsplash.com/photo-1611269154421-4e27233ac5c7?auto=format&fit=crop&w=800&q=80',
         name: 'Palm Leaf Wall Decor',
         category: 'Home Decor',
         artisan: 'Savita Craft Group',
