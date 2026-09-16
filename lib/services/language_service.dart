@@ -86,9 +86,7 @@ class LanguageService extends ChangeNotifier {
       'shop_now': 'Shop Now',
       'see_all': 'See All >',
       'featured_artisans': 'Featured Artisans',
-      'real_people': 'Real People.
-Real Crafts.
-Real Stories.',
+      '''real_people''': '''Real People.\nReal Crafts.\nReal Stories.''',
     },
     'hi': {
       'greeting_morning': 'सुप्रभात, अतिथि 🌅',
@@ -121,9 +119,7 @@ Real Stories.',
       'shop_now': 'अभी खरीदें',
       'see_all': 'सभी देखें >',
       'featured_artisans': 'विशेष कारीगर',
-      'real_people': 'असली लोग।
-असली शिल्प।
-असली कहानियाँ।',
+      '''real_people''': '''असली लोग।\nअसली शिल्प।\nअसली कहानियाँ।''',
     },
     'te': {
       'greeting_morning': 'శుభోదయం, అతిథి 🌅',
@@ -156,9 +152,7 @@ Real Stories.',
       'shop_now': 'ఇప్పుడే కొనండి',
       'see_all': 'అన్నీ చూడండి >',
       'featured_artisans': 'ప్రత్యేక కళాకారులు',
-      'real_people': 'నిజమైన ప్రజలు.
-నిజమైన కళలు.
-నిజమైన కథలు.',
+      '''real_people''': '''నిజమైన ప్రజలు.\nనిజమైన కళలు.\nనిజమైన కథలు.''',
     }
   };
 

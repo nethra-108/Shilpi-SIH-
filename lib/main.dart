@@ -166,17 +166,17 @@ class _MainPageState extends State<MainPage> {
                 });
               },
               destinations: <NavigationDestination>[
-                const NavigationDestination(
+                NavigationDestination(
                   icon: Icon(Icons.home_outlined, color: Colors.grey),
                   selectedIcon: Icon(Icons.home, color: Color(0xFF1B4332)),
                   label: LanguageService.instance.tr('home'),
                 ),
-                const NavigationDestination(
+                NavigationDestination(
                   icon: Icon(Icons.search, color: Colors.grey),
                   selectedIcon: Icon(Icons.search, color: Color(0xFF1B4332)),
                   label: LanguageService.instance.tr('search'),
                 ),
-                const NavigationDestination(
+                NavigationDestination(
                   icon: Icon(Icons.favorite_border, color: Colors.grey),
                   selectedIcon: Icon(Icons.favorite, color: Color(0xFF1B4332)),
                   label: LanguageService.instance.tr('wishlist'),
@@ -191,7 +191,7 @@ class _MainPageState extends State<MainPage> {
                   selectedIcon: const Icon(Icons.shopping_bag, color: Color(0xFF1B4332)),
                   label: LanguageService.instance.tr('cart'),
                 ),
-                const NavigationDestination(
+                NavigationDestination(
                   icon: Icon(Icons.person_outline, color: Colors.grey),
                   selectedIcon: Icon(Icons.person, color: Color(0xFF1B4332)),
                   label: LanguageService.instance.tr('profile'),
