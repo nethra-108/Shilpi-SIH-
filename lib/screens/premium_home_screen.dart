@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../constants/artisan_assets.dart';
+import '../services/shilpi_ai_service.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
@@ -241,7 +244,7 @@ class _FeaturedBanner extends StatelessWidget {
           )
         ],
         image: const DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1610715936287-6c2ad208cdbf?auto=format&fit=crop&w=800&q=80'),
+          image: const NetworkImage(ArtisanAssets.textiles),
           fit: BoxFit.cover,
         ),
       ),
@@ -359,9 +362,9 @@ class _FeaturedArtisansRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final artisans = [
-      {'name': 'Meenakshi Devi', 'craft_key': 'pottery', 'image': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Ramesh Kumar', 'craft_key': 'woodwork', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Lakshmi Bai', 'craft_key': 'textiles', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Meenakshi Devi', 'craft_key': 'pottery', 'image': ArtisanAssets.potterPortrait},
+      {'name': 'Ramesh Kumar', 'craft_key': 'woodwork', 'image': ArtisanAssets.sculptorPortrait},
+      {'name': 'Lakshmi Bai', 'craft_key': 'textiles', 'image': ArtisanAssets.weaverPortrait},
     ];
 
     return Column(
@@ -478,22 +481,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
     _controller.clear();
 
     try {
-      final response = await http.post(
-        Uri.parse('http://192.168.0.110:8000/chat'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'message': text}),
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _messages.add({"role": "ai", "text": data['reply'] ?? 'Received your message.'});
-        });
-      } else {
-        setState(() {
-          _messages.add({"role": "ai", "text": "Sorry, I am having trouble connecting to the server."});
-        });
-      }
+      final aiResponse = await ShilpiAiService.instance.ask(text, AiContextMode.buyer);
+      setState(() {
+        _messages.add({"role": "ai", "text": aiResponse.text});
+      });
     } catch (e) {
       setState(() {
         _messages.add({"role": "ai", "text": "Sorry, an error occurred. Is the local backend running?"});
@@ -820,12 +811,12 @@ class AllArtisansScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mockArtisans = [
-      {'name': 'Meenakshi Devi', 'craft': 'Terracotta Pottery', 'image': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Ramesh Kumar', 'craft': 'Wooden Sculptures', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Lakshmi Bai', 'craft': 'Handwoven Sarees', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Sanjay Sharma', 'craft': 'Brass Metalwork', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Anita Desai', 'craft': 'Beaded Jewellery', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
-      {'name': 'Karan Singh', 'craft': 'Blue Pottery', 'image': 'https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Meenakshi Devi', 'craft': 'Terracotta Pottery', 'image': ArtisanAssets.potterPortrait},
+      {'name': 'Ramesh Kumar', 'craft': 'Wooden Sculptures', 'image': ArtisanAssets.sculptorPortrait},
+      {'name': 'Lakshmi Bai', 'craft': 'Handwoven Sarees', 'image': ArtisanAssets.weaverPortrait},
+      {'name': 'Sanjay Sharma', 'craft': 'Brass Metalwork', 'image': ArtisanAssets.sculptorPortrait},
+      {'name': 'Anita Desai', 'craft': 'Beaded Jewellery', 'image': ArtisanAssets.weaverPortrait},
+      {'name': 'Karan Singh', 'craft': 'Blue Pottery', 'image': ArtisanAssets.potterPortrait},
     ];
 
     return Scaffold(
