@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/cart_item.dart';
 import '../models/order.dart';
+import 'notification_repository.dart';
 
 class OrderRepository extends ChangeNotifier {
   static final OrderRepository instance = OrderRepository._internal();
@@ -87,6 +88,13 @@ class OrderRepository extends ChangeNotifier {
     _orders.insert(0, order);
     await _saveToDisk();
     notifyListeners();
+    
+    // Push notification
+    NotificationRepository.instance.addNotification(
+      'Order Confirmed!',
+      'Your order ${order.orderId} has been successfully placed and is now Processing.',
+    );
+    
     return order;
   }
 
@@ -134,6 +142,13 @@ class OrderRepository extends ChangeNotifier {
       );
       await _saveToDisk();
       notifyListeners();
+      
+      if (newStatus == 'Cancelled') {
+        NotificationRepository.instance.addNotification(
+          'Order Cancelled',
+          'Your order ${old.orderId} has been cancelled successfully.',
+        );
+      }
     }
   }
 

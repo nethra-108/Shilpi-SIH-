@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/order_repository.dart';
+import '../repositories/notification_repository.dart';
 import '../repositories/product_repository.dart';
 import '../repositories/wishlist_repository.dart';
 import '../repositories/recent_repository.dart';
@@ -48,6 +49,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       WishlistRepository.instance.init(),
       RecentRepository.instance.init(),
       TtsService.instance.init(),
+      NotificationRepository.instance.init(),
       Future<void>.delayed(const Duration(milliseconds: 1400)),
     ]);
 

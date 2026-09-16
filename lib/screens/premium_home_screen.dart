@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../services/language_service.dart';
+import 'notifications_page.dart';
+import '../repositories/notification_repository.dart';
 
 class PremiumHomeScreen extends StatelessWidget {
   final VoidCallback onProfileTap;
@@ -120,8 +122,20 @@ class _HomeAppBar extends StatelessWidget {
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Color(0xFF1B4332), size: 24),
-                onPressed: () {},
+                icon: ListenableBuilder(
+                  listenable: NotificationRepository.instance,
+                  builder: (context, _) {
+                    final unreadCount = NotificationRepository.instance.notifications.where((n) => !n.isRead).length;
+                    return Badge(
+                      isLabelVisible: unreadCount > 0,
+                      label: Text('$unreadCount'),
+                      child: const Icon(Icons.notifications_outlined, color: Color(0xFF1B4332), size: 24),
+                    );
+                  },
+                ),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsPage()));
+                },
               ),
             ),
             const SizedBox(width: 12),
