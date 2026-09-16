@@ -4,6 +4,7 @@ import 'repositories/wishlist_repository.dart';
 import 'repositories/recent_repository.dart';
 import 'screens/seller_orders_page.dart';
 import 'services/shilpi_ai_service.dart';
+import 'services/language_service.dart';
 
 import 'theme/theme.dart';
 import 'theme/colors.dart';
@@ -25,8 +26,9 @@ import 'screens/product_details_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/voice_capture_dialog.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LanguageService.instance.init();
   runApp(const ShilpiApp());
 }
 
@@ -35,11 +37,16 @@ class ShilpiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Shilpi',
-      theme: ShilpiTheme.lightTheme,
-      home: const SplashScreen(nextScreen: MainPage()),
+    return ListenableBuilder(
+      listenable: LanguageService.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Shilpi',
+          theme: ShilpiTheme.lightTheme,
+          home: const SplashScreen(nextScreen: MainPage()),
+        );
+      }
     );
   }
 }
@@ -53,6 +60,16 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int selectedTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (LanguageService.instance.isFirstLaunch) {
+        LanguageService.showLanguageDialog(context);
+      }
+    });
+  }
 
   void openProduct(Product product) {
     Navigator.push(
@@ -200,11 +217,11 @@ class _ConsumerHomeState extends State<ConsumerHome> {
   String _getDynamicGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good Morning, Guest 🌅';
+      return LanguageService.instance.tr('greeting_morning');
     } else if (hour < 17) {
-      return 'Good Afternoon, Guest ☀️';
+      return LanguageService.instance.tr('greeting_afternoon');
     } else {
-      return 'Good Evening, Guest 🌙';
+      return LanguageService.instance.tr('greeting_evening');
     }
   }
 
@@ -272,7 +289,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Edit'),
+              child: Text('Edit'),
             ),
             FilledButton.icon(
               onPressed: () {
@@ -282,7 +299,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                 );
               },
               icon: const Icon(Icons.search),
-              label: const Text('Search'),
+              label: Text('Search'),
             ),
           ],
         );
@@ -318,8 +335,8 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ShilpiColors.textSecondary),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                'Discover Authentic India',
+                              Text(
+                                LanguageService.instance.tr('discover'),
                                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark, height: 1.2, letterSpacing: -0.5),
                               ),
                             ],
@@ -347,17 +364,20 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                                       const SizedBox(height: 16),
                                       ListTile(
                                         leading: const Icon(Icons.login, color: ShilpiColors.primary),
-                                        title: const Text('Login/Sign Up', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        title: Text(LanguageService.instance.tr('login_signup'), style: TextStyle(fontWeight: FontWeight.bold)),
                                         onTap: () => Navigator.pop(context),
                                       ),
                                       ListTile(
                                         leading: const Icon(Icons.language, color: ShilpiColors.primary),
-                                        title: const Text('Change Language (A/अ)', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        onTap: () => Navigator.pop(context),
+                                        title: Text(LanguageService.instance.tr('change_language'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          LanguageService.showLanguageDialog(context, dismissible: true);
+                                        },
                                       ),
                                       ListTile(
                                         leading: const Icon(Icons.settings, color: ShilpiColors.primary),
-                                        title: const Text('App Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        title: Text(LanguageService.instance.tr('app_settings'), style: TextStyle(fontWeight: FontWeight.bold)),
                                         onTap: () => Navigator.pop(context),
                                       ),
                                       const SizedBox(height: 16),
@@ -387,7 +407,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                           controller: searchController,
                           onSubmitted: widget.onSearch,
                           decoration: InputDecoration(
-                            hintText: 'Search crafts, regions, materials...',
+                            hintText: LanguageService.instance.tr('search_hint'),
                             prefixIcon: const Icon(Icons.search, color: ShilpiColors.textMuted),
                             suffixIcon: IconButton(
                               onPressed: () async {
@@ -452,15 +472,15 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                                 color: ShilpiColors.secondary,
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Text('FEATURED CRAFT', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                              child: Text(LanguageService.instance.tr('featured_craft'), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                             ),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'The Art of Terracotta',
                               style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Support 500-year-old traditions from rural artisans.',
                               style: TextStyle(color: Colors.white70, fontSize: 14),
                             ),
@@ -472,7 +492,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                                 foregroundColor: ShilpiColors.primaryDark,
                                 minimumSize: const Size(120, 40),
                               ),
-                              child: const Text('Explore Now'),
+                              child: Text(LanguageService.instance.tr('explore_now')),
                             )
                           ],
                         ),
@@ -481,11 +501,11 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Browse by Craft', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
+                          Text(LanguageService.instance.tr('browse_by_craft'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
                           TextButton(
                             onPressed: () => widget.onSearch(''),
                             style: TextButton.styleFrom(foregroundColor: ShilpiColors.primary),
-                            child: const Text('View All'),
+                            child: Text(LanguageService.instance.tr('view_all')),
                           ),
                         ],
                       ),
@@ -514,7 +534,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Your Wishlist', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
+                              Text(LanguageService.instance.tr('your_wishlist'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
                               const SizedBox(height: 16),
                               SizedBox(
                                 height: 260,
@@ -542,7 +562,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Recommended for You', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
+                          Text(LanguageService.instance.tr('recommended'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -588,7 +608,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Recently Viewed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
+                            Text(LanguageService.instance.tr('recently_viewed'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
                             const SizedBox(height: 16),
                             SizedBox(
                               height: 120,
@@ -638,7 +658,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                             children: [
                               Icon(Icons.verified_user, color: ShilpiColors.primary),
                               SizedBox(width: 8),
-                              Text('Why Shilpi?', style: TextStyle(fontWeight: FontWeight.bold, color: ShilpiColors.primaryDark, fontSize: 16)),
+                              Text(LanguageService.instance.tr('why_shilpi'), style: TextStyle(fontWeight: FontWeight.bold, color: ShilpiColors.primaryDark, fontSize: 16)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -1096,7 +1116,7 @@ class CartPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        const Text('Subtotal', style: TextStyle(color: Colors.grey)),
+                        Text('Subtotal', style: TextStyle(color: Colors.grey)),
                         Text('₹${cartRepo.subtotal}',
                             style: const TextStyle(fontWeight: FontWeight.bold)),
                       ],
@@ -1105,7 +1125,7 @@ class CartPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        const Text('Delivery', style: TextStyle(color: Colors.grey)),
+                        Text('Delivery', style: TextStyle(color: Colors.grey)),
                         Text(
                           cartRepo.deliveryFee == 0 ? 'FREE' : '₹${cartRepo.deliveryFee}',
                           style: const TextStyle(
@@ -1117,7 +1137,7 @@ class CartPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        const Text(
+                        Text(
                           'Total',
                           style: TextStyle(
                             fontSize: 18,
@@ -1155,7 +1175,7 @@ class CartPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Proceed to Checkout',
                           style:
                               TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -1184,7 +1204,7 @@ class OrdersPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(18),
           children: <Widget>[
-            const Text(
+            Text(
               'My Orders',
               style: TextStyle(
                 fontSize: 25,
@@ -1349,7 +1369,7 @@ class SellerPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const Text('My Craft Store', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: ShilpiColors.primaryDark)),
+                          Text('My Craft Store', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: ShilpiColors.primaryDark)),
                           const SizedBox(height: 24),
                           
                           // Revenue Card
@@ -1426,11 +1446,11 @@ class SellerPage extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('My Products', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark)),
+                              Text('My Products', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: ShilpiColors.primaryDark)),
                               TextButton(
                                 onPressed: onAdd,
                                 style: TextButton.styleFrom(foregroundColor: ShilpiColors.primary),
-                                child: const Text('Add New'),
+                                child: Text('Add New'),
                               )
                             ],
                           ),
@@ -1582,7 +1602,7 @@ class SellerPage extends StatelessWidget {
         final priceController = TextEditingController(text: product.price.toString());
         final stockController = TextEditingController(text: product.stock.toString());
         return AlertDialog(
-          title: const Text('Edit Product'),
+          title: Text('Edit Product'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1600,7 +1620,7 @@ class SellerPage extends StatelessWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
             FilledButton(
               onPressed: () {
                 final newPrice = int.tryParse(priceController.text) ?? product.price;
@@ -1631,7 +1651,7 @@ class SellerPage extends StatelessWidget {
                 ProductRepository.instance.updateProduct(updatedProduct);
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: Text('Save'),
             ),
           ],
         );
@@ -1665,10 +1685,10 @@ class SellerPage extends StatelessWidget {
             }
             if (snapshot.hasError || !snapshot.hasData) {
               return AlertDialog(
-                title: const Text('Error'),
-                content: const Text('Could not generate promo. Please try again later.'),
+                title: Text('Error'),
+                content: Text('Could not generate promo. Please try again later.'),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))
+                  TextButton(onPressed: () => Navigator.pop(context), child: Text('Close'))
                 ],
               );
             }
@@ -1683,13 +1703,13 @@ class SellerPage extends StatelessWidget {
               ),
               content: SingleChildScrollView(child: Text(text, style: const TextStyle(fontSize: 14))),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
                 FilledButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.copy, size: 16),
-                  label: const Text('Done'),
+                  label: Text('Done'),
                 )
               ],
             );
