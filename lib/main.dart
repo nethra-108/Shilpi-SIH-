@@ -189,6 +189,10 @@ class _MainPageState extends State<MainPage> {
         onSearchTap: () {
           setState(() => selectedTab = 1);
         },
+        onSearchSubmit: (query) {
+          setState(() => selectedTab = 1);
+          openSearch(query);
+        },
       ),
       ExplorePage(onOpen: openProduct),
       const OrdersPage(), // Reusing Orders as Wishlist/Heart tab placeholder

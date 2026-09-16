@@ -9,11 +9,13 @@ import '../services/language_service.dart';
 class PremiumHomeScreen extends StatelessWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onSearchTap;
+  final void Function(String)? onSearchSubmit;
   
   const PremiumHomeScreen({
     super.key,
     required this.onProfileTap,
     required this.onSearchTap,
+    this.onSearchSubmit,
   });
 
   @override
@@ -28,7 +30,7 @@ class PremiumHomeScreen extends StatelessWidget {
             children: [
               _HomeAppBar(onProfileTap: onProfileTap),
               const SizedBox(height: 32),
-              _SearchBar(onTap: onSearchTap),
+              _SearchBar(onTap: onSearchTap, onSearchSubmit: onSearchSubmit),
               const SizedBox(height: 32),
               const _FeaturedBanner(),
               const SizedBox(height: 40),
@@ -149,7 +151,8 @@ class _HomeAppBar extends StatelessWidget {
 
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
-  const _SearchBar({required this.onTap});
+  final void Function(String)? onSearchSubmit;
+  const _SearchBar({required this.onTap, this.onSearchSubmit});
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +169,11 @@ class _SearchBar extends StatelessWidget {
         ],
       ),
       child: TextField(
+        onSubmitted: (query) {
+          if (onSearchSubmit != null && query.isNotEmpty) {
+            onSearchSubmit!(query);
+          }
+        },
         decoration: InputDecoration(
           hintText: LanguageService.instance.tr('search_hint'),
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontFamily: 'Inter'),
@@ -337,9 +345,9 @@ class _FeaturedArtisansRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final artisans = [
-      {'name': 'Meenakshi Devi', 'craft_key': 'pottery', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Ramesh Kumar', 'craft_key': 'woodwork', 'image': 'https://images.unsplash.com/photo-1605369651581-2292cefc2754?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Lakshmi Bai', 'craft_key': 'textiles', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Meenakshi Devi', 'craft_key': 'pottery', 'image': 'https://images.unsplash.com/photo-1610715936287-6c2ad208cdbf?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Ramesh Kumar', 'craft_key': 'woodwork', 'image': 'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Lakshmi Bai', 'craft_key': 'textiles', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
     ];
 
     return Column(
@@ -794,12 +802,12 @@ class AllArtisansScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mockArtisans = [
-      {'name': 'Meenakshi Devi', 'craft': 'Terracotta Pottery', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Ramesh Kumar', 'craft': 'Wooden Sculptures', 'image': 'https://images.unsplash.com/photo-1605369651581-2292cefc2754?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Lakshmi Bai', 'craft': 'Handwoven Sarees', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Sanjay Sharma', 'craft': 'Brass Metalwork', 'image': 'https://images.unsplash.com/photo-1577905877864-16a7516da1a1?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Anita Desai', 'craft': 'Beaded Jewellery', 'image': 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=400&q=80'},
-      {'name': 'Karan Singh', 'craft': 'Blue Pottery', 'image': 'https://images.unsplash.com/photo-1622397333309-3056849bc70b?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Meenakshi Devi', 'craft': 'Terracotta Pottery', 'image': 'https://images.unsplash.com/photo-1610715936287-6c2ad208cdbf?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Ramesh Kumar', 'craft': 'Wooden Sculptures', 'image': 'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Lakshmi Bai', 'craft': 'Handwoven Sarees', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Sanjay Sharma', 'craft': 'Brass Metalwork', 'image': 'https://images.unsplash.com/photo-1610715936287-6c2ad208cdbf?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Anita Desai', 'craft': 'Beaded Jewellery', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=800&q=80'},
+      {'name': 'Karan Singh', 'craft': 'Blue Pottery', 'image': 'https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?auto=format&fit=crop&w=800&q=80'},
     ];
 
     return Scaffold(
