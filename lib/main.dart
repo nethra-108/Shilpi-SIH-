@@ -567,7 +567,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                           );
                         }
                       ),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(LanguageService.instance.tr('recommended'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ShilpiColors.primaryDark)),
@@ -662,7 +662,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
                               Icon(Icons.verified_user, color: ShilpiColors.primary),
                               SizedBox(width: 8),
