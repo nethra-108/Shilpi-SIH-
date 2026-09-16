@@ -36,6 +36,66 @@ Future<void> main() async {
 class ShilpiApp extends StatelessWidget {
   const ShilpiApp({super.key});
 
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -120,12 +180,72 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
       PremiumHomeScreen(
         onProfileTap: () {
-          LanguageService.showLanguageDialog(context, dismissible: true); // Show language/profile options for now
+          _showProfileBottomSheet(context);
         },
         onSearchTap: () {
           setState(() => selectedTab = 1);
@@ -310,6 +430,66 @@ class _ConsumerHomeState extends State<ConsumerHome> {
               label: Text('Search'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     );
@@ -769,6 +949,66 @@ class _ExplorePageState extends State<ExplorePage> {
     'Home Decor',
   ];
 
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -892,6 +1132,66 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Product> matches = ProductRepository.instance.search(_currentQuery);
@@ -956,6 +1256,66 @@ class _SearchPageState extends State<SearchPage> {
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
+
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1203,6 +1563,66 @@ class CartPage extends StatelessWidget {
 class OrdersPage extends StatelessWidget {
   const OrdersPage({super.key});
 
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -1353,6 +1773,66 @@ class SellerPage extends StatelessWidget {
     super.key,
     required this.onAdd,
   });
+
+
+  void _showProfileBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.person, size: 40, color: Color(0xFF1B4332)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Demo User',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Tech Enthusiast',
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'Inter'),
+              ),
+              const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: Color(0xFF1B4332)),
+                title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () => Navigator.pop(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF1B4332)),
+                title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() => selectedTab = 3); // Go to Cart/Orders (Placeholder)
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red, fontFamily: 'Inter')),
+                onTap: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

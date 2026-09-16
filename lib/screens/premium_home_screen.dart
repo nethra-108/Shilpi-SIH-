@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
 import '../services/language_service.dart';
 
 class PremiumHomeScreen extends StatelessWidget {
@@ -85,7 +90,7 @@ class _HomeAppBar extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 12),
         Row(
           children: [
             Container(
@@ -97,7 +102,23 @@ class _HomeAppBar extends StatelessWidget {
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Color(0xFF1B4332), size: 26),
+                icon: const Icon(Icons.language, color: Color(0xFF1B4332), size: 24),
+                onPressed: () {
+                  LanguageService.showLanguageDialog(context, dismissible: true);
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Color(0xFF1B4332), size: 24),
                 onPressed: () {},
               ),
             ),
@@ -113,7 +134,7 @@ class _HomeAppBar extends StatelessWidget {
                   ],
                 ),
                 child: const CircleAvatar(
-                  radius: 22,
+                  radius: 20,
                   backgroundColor: Color(0xFFE8F5E9),
                   child: Icon(Icons.person, color: Color(0xFF1B4332)),
                 ),
@@ -159,7 +180,12 @@ class _SearchBar extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const VoiceSearchScreen()));
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const VoiceSearchScreen(),
+                );
               },
               child: const Icon(Icons.mic_none, color: Color(0xFF1B4332), size: 24),
             ),
@@ -259,10 +285,9 @@ class _CategoriesRow extends StatelessWidget {
       clipBehavior: Clip.none,
       child: Row(
         children: categories.map((cat) {
-          final translatedName = LanguageService.instance.tr(cat['key'] as String);
           return GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryDetailScreen(category: translatedName)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryDetailScreen(category: LanguageService.instance.tr(cat['key'] as String))));
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 28.0),
@@ -282,7 +307,7 @@ class _CategoriesRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    translatedName,
+                    LanguageService.instance.tr(cat['key'] as String),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -402,30 +427,298 @@ class _FeaturedArtisansRow extends StatelessWidget {
 }
 
 // ==========================================
-// PLACEHOLDER SCREENS FOR NAVIGATION
+// AI CHAT SCREEN
 // ==========================================
 
-class AiChatScreen extends StatelessWidget {
-  const AiChatScreen({super.key});
+class AiChatScreen extends StatefulWidget {
+  final String? initialMessage;
+  const AiChatScreen({super.key, this.initialMessage});
+
+  @override
+  State<AiChatScreen> createState() => _AiChatScreenState();
+}
+
+class _AiChatScreenState extends State<AiChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, String>> _messages = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages.add({"role": "ai", "text": "Hello! I am your artisan assistant. How can I help you discover authentic crafts today?"});
+    if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
+      _controller.text = widget.initialMessage!;
+      _sendMessage();
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _messages.add({"role": "user", "text": text});
+      _isLoading = true;
+    });
+    _controller.clear();
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.0.110:8000/chat'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'message': text}),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _messages.add({"role": "ai", "text": data['reply'] ?? 'Received your message.'});
+        });
+      } else {
+        setState(() {
+          _messages.add({"role": "ai", "text": "Sorry, I am having trouble connecting to the server."});
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _messages.add({"role": "ai", "text": "Sorry, an error occurred. Is the local backend running?"});
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Assistant')),
-      body: const Center(child: Text('AI Chat Implementation Here')),
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1B4332),
+        foregroundColor: Colors.white,
+        title: const Text('AI Assistant', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold)),
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final msg = _messages[index];
+                final isUser = msg['role'] == 'user';
+                return Align(
+                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isUser ? const Color(0xFF1B4332) : Colors.white,
+                      borderRadius: BorderRadius.circular(16).copyWith(
+                        bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(16),
+                        bottomLeft: !isUser ? const Radius.circular(0) : const Radius.circular(16),
+                      ),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+                      ],
+                    ),
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                    child: Text(
+                      msg['text']!,
+                      style: TextStyle(
+                        color: isUser ? Colors.white : const Color(0xFF1B4332),
+                        fontFamily: 'Inter',
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(color: Color(0xFF1B4332)),
+            ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontFamily: 'Inter'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                      filled: true,
+                      fillColor: const Color(0xFFF8F9FA),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1B4332),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.send, color: Colors.white, size: 20),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
 
-class VoiceSearchScreen extends StatelessWidget {
+// ==========================================
+// VOICE SEARCH BOTTOM SHEET
+// ==========================================
+
+class VoiceSearchScreen extends StatefulWidget {
   const VoiceSearchScreen({super.key});
+
+  @override
+  State<VoiceSearchScreen> createState() => _VoiceSearchScreenState();
+}
+
+class _VoiceSearchScreenState extends State<VoiceSearchScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  final _audioRecorder = AudioRecorder();
+  bool _isRecording = false;
+  bool _isProcessing = false;
+  String? _audioPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+    _startRecording();
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        final dir = await getTemporaryDirectory();
+        _audioPath = '${dir.path}/voice_query.m4a';
+        await _audioRecorder.start(const RecordConfig(), path: _audioPath!);
+        setState(() => _isRecording = true);
+      } else {
+        Navigator.pop(context); // No permission
+      }
+    } catch (e) {
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _stopAndSend() async {
+    if (!_isRecording) return;
+    setState(() {
+      _isRecording = false;
+      _isProcessing = true;
+    });
+    
+    await _audioRecorder.stop();
+    _animationController.stop();
+    
+    if (_audioPath != null) {
+      try {
+        final request = http.MultipartRequest('POST', Uri.parse('http://192.168.0.110:8000/speech-to-text'));
+        request.files.add(await http.MultipartFile.fromPath('audio', _audioPath!));
+        final streamedResponse = await request.send();
+        final response = await http.Response.fromStream(streamedResponse);
+        
+        if (response.statusCode == 200 && mounted) {
+          final text = jsonDecode(response.body)['text'] ?? '';
+          Navigator.pop(context); // Close voice sheet
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AiChatScreen(initialMessage: text)));
+          return;
+        }
+      } catch (_) {}
+    }
+    
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _audioRecorder.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Voice Search')),
-      body: const Center(child: Text('Listening...')),
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _isProcessing ? 'Processing audio...' : 'Listening...',
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter'),
+          ),
+          const SizedBox(height: 40),
+          GestureDetector(
+            onTap: _isProcessing ? null : _stopAndSend,
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Container(
+                  padding: EdgeInsets.all(32 + (_animationController.value * 16)),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9).withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1B4332),
+                      shape: BoxShape.circle,
+                    ),
+                    child: _isProcessing 
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Icon(Icons.mic, color: Colors.white, size: 48),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 40),
+          const Text(
+            'Tap to stop recording',
+            style: TextStyle(color: Colors.grey, fontFamily: 'Inter'),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }
+
+// ==========================================
+// PLACEHOLDER SCREENS
+// ==========================================
 
 class CategoryDetailScreen extends StatelessWidget {
   final String category;
@@ -433,7 +726,7 @@ class CategoryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(category)),
+      appBar: AppBar(title: Text(category, style: const TextStyle(color: Color(0xFF1B4332)))),
       body: Center(child: Text('Explore $category crafts')),
     );
   }
@@ -444,7 +737,7 @@ class AllArtisansScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('All Artisans')),
+      appBar: AppBar(title: const Text('All Artisans', style: TextStyle(color: Color(0xFF1B4332)))),
       body: const Center(child: Text('List of all artisans here')),
     );
   }
