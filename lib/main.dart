@@ -191,7 +191,7 @@ class _MainPageState extends State<MainPage> {
         },
         onSearchSubmit: (query) {
           setState(() => selectedTab = 1);
-          openSearch(query);
+          searchProducts(query);
         },
       ),
       ExplorePage(onOpen: openProduct),
