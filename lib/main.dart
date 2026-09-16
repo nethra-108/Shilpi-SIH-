@@ -1322,22 +1322,21 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: OrderRepository.instance,
-      builder: (BuildContext context, _) {
-        final orders = OrderRepository.instance.orders;
-        return ListView(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: const Text('My Orders', style: TextStyle(color: Color(0xFF1B4332), fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF1B4332)),
+      ),
+      body: ListenableBuilder(
+        listenable: OrderRepository.instance,
+        builder: (BuildContext context, _) {
+          final orders = OrderRepository.instance.orders;
+          return ListView(
           padding: const EdgeInsets.all(18),
           children: <Widget>[
-            Text(
-              'My Orders',
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.w900,
-                color: kDarkGreen,
-              ),
-            ),
-            const SizedBox(height: 14),
             if (orders.isEmpty)
               const Center(
                 child: Padding(
@@ -1459,7 +1458,7 @@ class OrdersPage extends StatelessWidget {
           ],
         );
       },
-    );
+    ));
   }
 }
 
