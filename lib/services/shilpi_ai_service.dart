@@ -82,16 +82,26 @@ class ShilpiAiService {
         Uri.parse(BackendConfig.askAiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 15));
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return AiResponse(
-          text: data['response']?.toString() ?? 'I understood your request, but received an empty response.',
-          isLocal: false,
-        );
+      if (response.statusCode == 200 || response.statusCode == 400 || response.statusCode == 500) {
+        try {
+          final data = jsonDecode(response.body);
+          final String replyText = data['text']?.toString() ?? 
+                                   data['reply']?.toString() ?? 
+                                   data['response']?.toString() ?? 
+                                   data['answer']?.toString() ?? 
+                                   'I understood your request, but received an empty response.';
+          return AiResponse(text: replyText, isLocal: false);
+        } catch (_) {
+          return AiResponse(text: 'Received an invalid response format from the AI server.', isLocal: true);
+        }
+      } else {
+        return AiResponse(text: 'Server returned status code ${response.statusCode}.', isLocal: true);
       }
     } catch (e) {
+      print('AI Service Error: $e'); // Debug logger
+      
       // Backend failed, provide a graceful offline message or generic fallback
       if (mode == AiContextMode.product && currentProduct != null) {
         if (lowerPrompt.contains('material') || lowerPrompt.contains('made of')) {
@@ -103,14 +113,9 @@ class ShilpiAiService {
       }
       
       return AiResponse(
-        text: 'The AI backend is currently unreachable. Please check your connection or try again later.',
+        text: 'The AI backend is currently unreachable. Error: $e',
         isLocal: true,
       );
     }
-
-    return AiResponse(
-      text: 'I could not generate a response at this time. Please try again.',
-      isLocal: true,
-    );
   }
 }
