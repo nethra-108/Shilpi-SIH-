@@ -1081,18 +1081,11 @@ class CartPage extends StatelessWidget {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: (product.imagePath != null &&
-                                            File(product.imagePath!).existsSync())
-                                        ? Image.file(
-                                            File(product.imagePath!),
-                                            fit: BoxFit.contain,
-                                          )
-                                        : Center(
-                                            child: Text(
-                                              product.emoji,
-                                              style: const TextStyle(fontSize: 26),
-                                            ),
-                                          ),
+                                    child: (product.imagePath != null)
+                                        ? (product.imagePath!.startsWith('http') 
+                                            ? Image.network(product.imagePath!, fit: BoxFit.contain)
+                                            : (File(product.imagePath!).existsSync() ? Image.file(File(product.imagePath!), fit: BoxFit.contain) : Center(child: Text(product.emoji, style: const TextStyle(fontSize: 26)))))
+                                        : Center(child: Text(product.emoji, style: const TextStyle(fontSize: 26))),
                                   ),
                                 ),
                                 const SizedBox(width: 12),

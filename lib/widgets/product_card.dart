@@ -31,8 +31,10 @@ class ProductCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: ShilpiColors.surfaceMuted,
                     ),
-                    child: (product.imagePath != null && File(product.imagePath!).existsSync())
-                        ? Image.file(File(product.imagePath!), fit: BoxFit.cover)
+                    child: (product.imagePath != null)
+                        ? (product.imagePath!.startsWith('http') 
+                            ? Image.network(product.imagePath!, fit: BoxFit.cover)
+                            : (File(product.imagePath!).existsSync() ? Image.file(File(product.imagePath!), fit: BoxFit.cover) : Center(child: Text(product.emoji, style: const TextStyle(fontSize: 60)))))
                         : Center(child: Text(product.emoji, style: const TextStyle(fontSize: 60))),
                   ),
                   Positioned(

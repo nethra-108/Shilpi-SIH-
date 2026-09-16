@@ -153,43 +153,49 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            )
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.search, color: Colors.grey, size: 22),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                LanguageService.instance.tr('search_hint'),
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontFamily: 'Inter'),
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          )
+        ],
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: LanguageService.instance.tr('search_hint'),
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontFamily: 'Inter'),
+          prefixIcon: const Padding(
+            padding: EdgeInsets.only(left: 16.0, right: 12.0),
+            child: Icon(Icons.search, color: Colors.grey, size: 22),
+          ),
+          prefixIconConstraints: const BoxConstraints(minWidth: 40),
+          suffixIcon: GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const VoiceSearchScreen(),
+              );
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.mic_none, color: Color(0xFF1B4332), size: 24),
             ),
-            GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => const VoiceSearchScreen(),
-                );
-              },
-              child: const Icon(Icons.mic_none, color: Color(0xFF1B4332), size: 24),
-            ),
-          ],
+          ),
+          suffixIconConstraints: const BoxConstraints(minWidth: 40),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
       ),
     );
@@ -344,23 +350,13 @@ class _FeaturedArtisansRow extends StatelessWidget {
           children: [
             Text(
               LanguageService.instance.tr('featured_artisans'),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1B4332),
-                fontFamily: 'Inter',
-                letterSpacing: -0.5,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter', letterSpacing: -0.5),
             ),
             TextButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AllArtisansScreen()));
               },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF1B4332),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+              style: TextButton.styleFrom(foregroundColor: const Color(0xFF1B4332)),
               child: Text(LanguageService.instance.tr('see_all'), style: const TextStyle(fontWeight: FontWeight.bold)),
             )
           ],
@@ -371,51 +367,47 @@ class _FeaturedArtisansRow extends StatelessWidget {
           clipBehavior: Clip.none,
           child: Row(
             children: artisans.map((artisan) {
-              return Container(
-                width: 170,
-                margin: const EdgeInsets.only(right: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8))
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 140,
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                        image: DecorationImage(
-                          image: NetworkImage(artisan['image']!),
-                          fit: BoxFit.cover,
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => ArtisanProfileScreen(
+                      name: artisan['name']!, 
+                      craft: LanguageService.instance.tr(artisan['craft_key']!), 
+                      imageUrl: artisan['image']!
+                    )
+                  ));
+                },
+                child: Container(
+                  width: 170,
+                  margin: const EdgeInsets.only(right: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 140,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                          image: DecorationImage(image: NetworkImage(artisan['image']!), fit: BoxFit.cover),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            artisan['name']!,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1B4332), fontFamily: 'Inter'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            LanguageService.instance.tr(artisan['craft_key']!),
-                            style: const TextStyle(color: Colors.grey, fontSize: 13, fontFamily: 'Inter'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(artisan['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1B4332)), maxLines: 1),
+                            const SizedBox(height: 6),
+                            Text(LanguageService.instance.tr(artisan['craft_key']!), style: const TextStyle(color: Colors.grey, fontSize: 13), maxLines: 1),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               );
             }).toList(),
@@ -732,13 +724,143 @@ class CategoryDetailScreen extends StatelessWidget {
   }
 }
 
-class AllArtisansScreen extends StatelessWidget {
-  const AllArtisansScreen({super.key});
+class ArtisanProfileScreen extends StatelessWidget {
+  final String name;
+  final String craft;
+  final String imageUrl;
+  
+  const ArtisanProfileScreen({super.key, required this.name, required this.craft, required this.imageUrl});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('All Artisans', style: TextStyle(color: Color(0xFF1B4332)))),
-      body: const Center(child: Text('List of all artisans here')),
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.network(imageUrl, fit: BoxFit.cover),
+            ),
+            backgroundColor: const Color(0xFF1B4332),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter')),
+                  const SizedBox(height: 8),
+                  Text(craft, style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                  const SizedBox(height: 24),
+                  const Text('About the Artisan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1B4332), fontFamily: 'Inter')),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Handcrafting authentic goods for over 20 years. Every piece is made with love, passion, and a dedication to preserving traditional techniques passed down through generations. Supporting this craft empowers local communities.",
+                    style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.6, fontFamily: 'Inter'),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B4332),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Support & Shop', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class AllArtisansScreen extends StatelessWidget {
+  const AllArtisansScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final mockArtisans = [
+      {'name': 'Meenakshi Devi', 'craft': 'Terracotta Pottery', 'image': 'https://images.unsplash.com/photo-1552528148-356bc0c5765c?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Ramesh Kumar', 'craft': 'Wooden Sculptures', 'image': 'https://images.unsplash.com/photo-1605369651581-2292cefc2754?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Lakshmi Bai', 'craft': 'Handwoven Sarees', 'image': 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Sanjay Sharma', 'craft': 'Brass Metalwork', 'image': 'https://images.unsplash.com/photo-1577905877864-16a7516da1a1?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Anita Desai', 'craft': 'Beaded Jewellery', 'image': 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=400&q=80'},
+      {'name': 'Karan Singh', 'craft': 'Blue Pottery', 'image': 'https://images.unsplash.com/photo-1622397333309-3056849bc70b?auto=format&fit=crop&w=400&q=80'},
+    ];
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: const Text('Featured Artisans', style: TextStyle(color: Color(0xFF1B4332), fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF1B4332)),
+      ),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(20),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: mockArtisans.length,
+        itemBuilder: (context, index) {
+          final artisan = mockArtisans[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) => ArtisanProfileScreen(name: artisan['name']!, craft: artisan['craft']!, imageUrl: artisan['image']!)
+              ));
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8))],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        image: DecorationImage(image: NetworkImage(artisan['image']!), fit: BoxFit.cover),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(artisan['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1B4332)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 4),
+                        Text(artisan['craft']!, style: const TextStyle(color: Colors.grey, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

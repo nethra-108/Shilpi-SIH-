@@ -39,12 +39,15 @@ class ProductRepository extends ChangeNotifier {
           final dynamic decoded = jsonDecode(content);
           if (decoded is List) {
             _products.clear();
+            bool needsReseed = false;
             for (final item in decoded) {
               if (item is Map<String, dynamic>) {
-                _products.add(Product.fromJson(item));
+                final p = Product.fromJson(item);
+                if (p.imagePath == null) needsReseed = true;
+                _products.add(p);
               }
             }
-            if (_products.isNotEmpty) {
+            if (_products.isNotEmpty && !needsReseed) {
               notifyListeners();
               return;
             }
