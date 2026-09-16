@@ -119,6 +119,13 @@ class _MainPageState extends State<MainPage> {
 
     return Scaffold(
       body: SafeArea(child: pages[selectedTab]),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print("AI Chat Opened");
+        },
+        backgroundColor: Colors.orange.shade700,
+        child: const Icon(Icons.auto_awesome, color: Colors.white),
+      ),
       bottomNavigationBar: ListenableBuilder(
         listenable: CartRepository.instance,
         builder: (context, _) {
@@ -188,6 +195,19 @@ class ConsumerHome extends StatefulWidget {
 }
 
 class _ConsumerHomeState extends State<ConsumerHome> {
+  bool _isListeningSimulated = false;
+
+  String _getDynamicGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning, Guest 🌅';
+    } else if (hour < 17) {
+      return 'Good Afternoon, Guest ☀️';
+    } else {
+      return 'Good Evening, Guest 🌙';
+    }
+  }
+
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -294,8 +314,8 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Namaste, Guest 🙏',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ShilpiColors.textSecondary),
+                                _getDynamicGreeting(),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ShilpiColors.textSecondary),
                               ),
                               const SizedBox(height: 4),
                               const Text(
@@ -304,7 +324,49 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                               ),
                             ],
                           ),
-                          Container(
+                          GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                ),
+                                builder: (context) => SafeArea(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const SizedBox(height: 16),
+                                      Container(
+                                        width: 40,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      ListTile(
+                                        leading: const Icon(Icons.login, color: ShilpiColors.primary),
+                                        title: const Text('Login/Sign Up', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        onTap: () => Navigator.pop(context),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.language, color: ShilpiColors.primary),
+                                        title: const Text('Change Language (A/अ)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        onTap: () => Navigator.pop(context),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.settings, color: ShilpiColors.primary),
+                                        title: const Text('App Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        onTap: () => Navigator.pop(context),
+                                      ),
+                                      const SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(color: ShilpiColors.primary, width: 2),
@@ -314,6 +376,7 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                               radius: 20,
                               child: Icon(Icons.person, color: ShilpiColors.primary),
                             ),
+                          ),
                           )
                         ],
                       ),
@@ -327,14 +390,31 @@ class _ConsumerHomeState extends State<ConsumerHome> {
                             hintText: 'Search crafts, regions, materials...',
                             prefixIcon: const Icon(Icons.search, color: ShilpiColors.textMuted),
                             suffixIcon: IconButton(
-                              onPressed: voiceSearch,
+                              onPressed: () async {
+                                setState(() {
+                                  _isListeningSimulated = true;
+                                });
+                                await Future.delayed(const Duration(seconds: 2));
+                                if (mounted) {
+                                  setState(() {
+                                    _isListeningSimulated = false;
+                                  });
+                                  voiceSearch();
+                                }
+                              },
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: ShilpiColors.primaryLight,
+                                  color: _isListeningSimulated ? Colors.red.shade50 : ShilpiColors.primaryLight,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.mic, color: ShilpiColors.primary, size: 20),
+                                child: _isListeningSimulated 
+                                  ? const SizedBox(
+                                      width: 20, 
+                                      height: 20, 
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                                    )
+                                  : const Icon(Icons.mic, color: ShilpiColors.primary, size: 20),
                               ),
                             ),
                             filled: true,
