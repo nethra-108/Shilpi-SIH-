@@ -5,6 +5,7 @@ import 'repositories/recent_repository.dart';
 import 'screens/seller_orders_page.dart';
 import 'services/shilpi_ai_service.dart';
 import 'services/language_service.dart';
+import 'screens/premium_home_screen.dart';
 
 import 'theme/theme.dart';
 import 'theme/colors.dart';
@@ -122,13 +123,17 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
-      ConsumerHome(
-        onOpen: openProduct,
-        onSearch: searchProducts,
+      PremiumHomeScreen(
+        onProfileTap: () {
+          LanguageService.showLanguageDialog(context, dismissible: true); // Show language/profile options for now
+        },
+        onSearchTap: () {
+          setState(() => selectedTab = 1);
+        },
       ),
       ExplorePage(onOpen: openProduct),
+      const OrdersPage(), // Reusing Orders as Wishlist/Heart tab placeholder
       const CartPage(),
-      const OrdersPage(),
       SellerPage(
         onAdd: addSellerProduct,
       ),
@@ -147,49 +152,52 @@ class _MainPageState extends State<MainPage> {
         listenable: CartRepository.instance,
         builder: (context, _) {
           final int cartCount = CartRepository.instance.itemCount;
-          return NavigationBar(
-            selectedIndex: selectedTab,
-            onDestinationSelected: (int index) {
-              setState(() {
-                selectedTab = index;
-              });
-            },
-            destinations: <NavigationDestination>[
-              const NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.search),
-                label: 'Explore',
-              ),
-              NavigationDestination(
-                icon: cartCount > 0
-                    ? Badge(
-                        label: Text('$cartCount'),
-                        child: const Icon(Icons.shopping_cart_outlined),
-                      )
-                    : const Icon(Icons.shopping_cart_outlined),
-                selectedIcon: cartCount > 0
-                    ? Badge(
-                        label: Text('$cartCount'),
-                        child: const Icon(Icons.shopping_cart),
-                      )
-                    : const Icon(Icons.shopping_cart),
-                label: 'Cart',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long),
-                label: 'Orders',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.storefront_outlined),
-                selectedIcon: Icon(Icons.storefront),
-                label: 'Sell',
-              ),
-            ],
+          return Container(
+            decoration: BoxDecoration(
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+            ),
+            child: NavigationBar(
+              backgroundColor: Colors.white,
+              indicatorColor: const Color(0xFFE8F5E9),
+              selectedIndex: selectedTab,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  selectedTab = index;
+                });
+              },
+              destinations: <NavigationDestination>[
+                const NavigationDestination(
+                  icon: Icon(Icons.home_outlined, color: Colors.grey),
+                  selectedIcon: Icon(Icons.home, color: Color(0xFF1B4332)),
+                  label: 'Home',
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.search, color: Colors.grey),
+                  selectedIcon: Icon(Icons.search, color: Color(0xFF1B4332)),
+                  label: 'Search',
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.favorite_border, color: Colors.grey),
+                  selectedIcon: Icon(Icons.favorite, color: Color(0xFF1B4332)),
+                  label: 'Wishlist',
+                ),
+                NavigationDestination(
+                  icon: cartCount > 0
+                      ? Badge(
+                          label: Text('$cartCount'),
+                          child: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                        )
+                      : const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                  selectedIcon: const Icon(Icons.shopping_bag, color: Color(0xFF1B4332)),
+                  label: 'Cart',
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.person_outline, color: Colors.grey),
+                  selectedIcon: Icon(Icons.person, color: Color(0xFF1B4332)),
+                  label: 'Profile',
+                ),
+              ],
+            ),
           );
         },
       ),
