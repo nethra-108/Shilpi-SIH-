@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/order_repository.dart';
-import '../main.dart';
+import 'orders_page.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final int total;
@@ -88,7 +88,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 Navigator.pop(dialogContext);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const OrdersPage()),
+                  MaterialPageRoute(builder: (context) => OrdersPage()),
                 );
               },
               child: const Text('View Orders'),

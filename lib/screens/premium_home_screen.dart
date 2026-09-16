@@ -422,9 +422,9 @@ class _FeaturedArtisansRow extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(artisan['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1B4332)), maxLines: 1),
+                            Text(artisan['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1B4332)), maxLines: 1, overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 6),
-                            Text(LanguageService.instance.tr(artisan['craft_key']!), style: const TextStyle(color: Colors.grey, fontSize: 13), maxLines: 1),
+                            Text(LanguageService.instance.tr(artisan['craft_key']!), style: const TextStyle(color: Colors.grey, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                           ],
                         ),
                       )
@@ -763,7 +763,11 @@ class ArtisanProfileScreen extends StatelessWidget {
             expandedHeight: 300,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.network(imageUrl, fit: BoxFit.cover),
+              background: Image.network(
+                imageUrl, 
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade200, child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey))),
+              ),
             ),
             backgroundColor: const Color(0xFF1B4332),
             leading: IconButton(
