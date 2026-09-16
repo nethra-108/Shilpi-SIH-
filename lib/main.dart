@@ -143,7 +143,7 @@ class _MainPageState extends State<MainPage> {
       body: SafeArea(child: pages[selectedTab]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print("AI Chat Opened");
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AiChatScreen()));
         },
         backgroundColor: Colors.orange.shade700,
         child: const Icon(Icons.auto_awesome, color: Colors.white),
@@ -169,17 +169,17 @@ class _MainPageState extends State<MainPage> {
                 const NavigationDestination(
                   icon: Icon(Icons.home_outlined, color: Colors.grey),
                   selectedIcon: Icon(Icons.home, color: Color(0xFF1B4332)),
-                  label: 'Home',
+                  label: LanguageService.instance.tr('home'),
                 ),
                 const NavigationDestination(
                   icon: Icon(Icons.search, color: Colors.grey),
                   selectedIcon: Icon(Icons.search, color: Color(0xFF1B4332)),
-                  label: 'Search',
+                  label: LanguageService.instance.tr('search'),
                 ),
                 const NavigationDestination(
                   icon: Icon(Icons.favorite_border, color: Colors.grey),
                   selectedIcon: Icon(Icons.favorite, color: Color(0xFF1B4332)),
-                  label: 'Wishlist',
+                  label: LanguageService.instance.tr('wishlist'),
                 ),
                 NavigationDestination(
                   icon: cartCount > 0
@@ -189,12 +189,12 @@ class _MainPageState extends State<MainPage> {
                         )
                       : const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
                   selectedIcon: const Icon(Icons.shopping_bag, color: Color(0xFF1B4332)),
-                  label: 'Cart',
+                  label: LanguageService.instance.tr('cart'),
                 ),
                 const NavigationDestination(
                   icon: Icon(Icons.person_outline, color: Colors.grey),
                   selectedIcon: Icon(Icons.person, color: Color(0xFF1B4332)),
-                  label: 'Profile',
+                  label: LanguageService.instance.tr('profile'),
                 ),
               ],
             ),
